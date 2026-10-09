@@ -1,0 +1,52 @@
+services:
+  # 1. เว็บเซิร์ฟเวอร์ PHP (Apache)
+  web:
+    build: .
+    container_name: crud_web_app
+    ports:
+      - "8000:80"
+    volumes:
+      - ./www:/var/www/html
+    depends_on:
+      - db
+    networks:
+      - crud-network
+
+  # 2. ฐานข้อมูล MySQL
+  db:
+    image: mysql:8.0
+    container_name: crud_mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: crud_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - crud-network
+
+  # 3. เครื่องมือจัดการฐานข้อมูล phpMyAdmin
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: crud_phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: root_password
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    networks:
+      - crud-network
+
+networks:
+  crud-network:
+    driver: bridge
+
+volumes:
+  db_data:
